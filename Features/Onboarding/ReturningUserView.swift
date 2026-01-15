@@ -43,7 +43,7 @@ struct ReturningUserView: View {
                 
                 // Title
                 VStack(spacing: Spacing.sm) {
-                    Text("Pick Up Where You Left Off")
+                    Text("Pick up where you left off")
                         .font(.titleMedium)
                         .foregroundColor(.textPrimary)
                         .multilineTextAlignment(.center)
