@@ -113,6 +113,26 @@ struct ReturningUserView: View {
     private var monthSelector: some View {
         VStack(spacing: Spacing.md) {
             if let year = selectedYear {
+                HStack {
+                    Button(action: {
+                        withAnimation {
+                            showMonthPicker = false
+                            selectedMonth = nil
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 12, weight: .semibold))
+                            Text("Back")
+                                .font(.labelMedium)
+                        }
+                        .foregroundColor(.rose)
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.lg)
+                
                 Text("Which month in \(String(year))?")
                     .font(.labelMedium)
                     .foregroundColor(.textTertiary)
@@ -178,18 +198,6 @@ struct ReturningUserView: View {
                             .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
                     }
                     .padding(.horizontal, Spacing.lg)
-                    
-                    Button(action: {
-                        withAnimation {
-                            showMonthPicker = false
-                            selectedMonth = nil
-                        }
-                    }) {
-                        Text("Back to year")
-                            .font(.labelLarge)
-                            .foregroundColor(.textSecondary)
-                            .padding(.vertical, 12)
-                    }
                 }
             }
             
