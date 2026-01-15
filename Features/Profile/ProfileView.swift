@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ProfileView: View {
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var store = StoreKitManager.shared
+    @State private var showPaywall = false
     private let stats = StatsService.shared
     
     var body: some View {
@@ -23,6 +25,11 @@ struct ProfileView: View {
                     // Achievements
                     achievementsSection
                     
+                    // Upgrade card (only show if not Pro)
+                    if !store.isPro {
+                        upgradeCard
+                    }
+                    
                     // Privacy section
                     privacySection
                     
@@ -41,6 +48,50 @@ struct ProfileView: View {
                 }
             }
         }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
+        }
+    }
+    
+    private var upgradeCard: some View {
+        Button(action: { showPaywall = true }) {
+            HStack(spacing: Spacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(Color.roseLight)
+                        .frame(width: 44, height: 44)
+                    
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 18))
+                        .foregroundColor(.rose)
+                }
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Unlock tidied")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.textPrimary)
+                    
+                    Text("Unlimited months • Support indie dev")
+                        .font(.labelSmall)
+                        .foregroundColor(.textSecondary)
+                }
+                
+                Spacer()
+                
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(.textTertiary)
+            }
+            .padding(Spacing.md)
+            .background(Color.cardBackground)
+            .clipShape(RoundedRectangle(cornerRadius: CornerRadius.large))
+            .overlay(
+                RoundedRectangle(cornerRadius: CornerRadius.large)
+                    .stroke(Color.rose.opacity(0.3), lineWidth: 1)
+            )
+            .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 4)
+        }
+        .buttonStyle(PlainButtonStyle())
     }
     
     private var header: some View {

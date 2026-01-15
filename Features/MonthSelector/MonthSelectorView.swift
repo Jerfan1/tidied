@@ -5,8 +5,11 @@ struct MonthSelectorView: View {
     @State private var isLoading = true
     @State private var selectedMonth: PhotoMonth?
     @State private var showingProfile = false
+    @State private var showingPaywall = false
     @State private var animateIn = false
+    @State private var lastCompletedMonthName: String = ""
     
+    @StateObject private var store = StoreKitManager.shared
     private let monthService = PhotoMonthService.shared
     private let stats = StatsService.shared
     
@@ -34,10 +37,9 @@ struct MonthSelectorView: View {
                     ScrollView(showsIndicators: false) {
                         LazyVGrid(columns: columns, spacing: 16) {
                             ForEach(Array(months.enumerated()), id: \.element.id) { index, month in
-                                MonthCard(month: month) {
+                                MonthCard(month: month, isLocked: isMonthLocked(month)) {
                                     print("📱 Tapped: \(month.displayName) with \(month.assets.count) assets")
-                                    selectedMonth = month
-                                    print("📱 selectedMonth set to: \(month.displayName)")
+                                    handleMonthTap(month)
                                 }
                                 .opacity(animateIn ? 1 : 0)
                                 .scaleEffect(animateIn ? 1 : 0.95)
@@ -70,6 +72,40 @@ struct MonthSelectorView: View {
         }
         .sheet(isPresented: $showingProfile) {
             NavigationStack { ProfileView() }
+        }
+        .sheet(isPresented: $showingPaywall) {
+            PaywallView(completedMonthName: lastCompletedMonthName)
+        }
+    }
+    
+    // MARK: - Paywall Logic
+    
+    /// Check if a month should be locked (requires payment)
+    private func isMonthLocked(_ month: PhotoMonth) -> Bool {
+        // Pro users: nothing locked
+        if store.isPro { return false }
+        
+        // Already completed months: not locked (they can revisit)
+        if month.isCompleted { return false }
+        
+        // If they haven't completed any month yet: first one is free
+        if completedCount == 0 { return false }
+        
+        // They've completed 1+ months and aren't Pro: lock new months
+        return true
+    }
+    
+    /// Handle tapping on a month
+    private func handleMonthTap(_ month: PhotoMonth) {
+        if isMonthLocked(month) {
+            // Find their last completed month for the paywall message
+            if let lastCompleted = months.first(where: { $0.isCompleted }) {
+                lastCompletedMonthName = lastCompleted.displayName
+            }
+            showingPaywall = true
+        } else {
+            selectedMonth = month
+            print("📱 selectedMonth set to: \(month.displayName)")
         }
     }
     
@@ -150,6 +186,7 @@ struct MonthSelectorView: View {
 // MARK: - Month Card (Clean with seasonal icons)
 struct MonthCard: View {
     let month: PhotoMonth
+    var isLocked: Bool = false
     let onTap: () -> Void
     
     // Seasonal icon based on month
@@ -202,6 +239,11 @@ struct MonthCard: View {
                         Image(systemName: "checkmark")
                             .font(.system(size: 24, weight: .bold))
                             .foregroundColor(.white)
+                    } else if isLocked {
+                        // Locked - show lock icon
+                        Image(systemName: "lock.fill")
+                            .font(.system(size: 22))
+                            .foregroundColor(.textTertiary)
                     } else {
                         // Seasonal icon
                         Image(systemName: seasonIcon)
