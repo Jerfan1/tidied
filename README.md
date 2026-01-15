@@ -28,4 +28,4 @@ tidied helps you clean your camera roll month-by-month. Swipe left to delete, ri
 
 ## License
 
-MIT License — see [LICENSE](LICENSE)
+Source Available — see [LICENSE](LICENSE)
