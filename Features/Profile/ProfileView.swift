@@ -82,17 +82,29 @@ struct ProfileView: View {
                 PrivacyRow(icon: "xmark.icloud.fill", title: "No Cloud", description: "No servers, no uploads, no AI training on your images.")
             }
             
-            // GitHub link
-            Button(action: openGitHub) {
-                HStack {
-                    Image(systemName: "link")
-                        .font(.system(size: 14))
-                    Text("View source on GitHub")
-                        .font(.labelMedium)
+            // Links
+            HStack(spacing: Spacing.lg) {
+                Button(action: openGitHub) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left.forwardslash.chevron.right")
+                            .font(.system(size: 12))
+                        Text("Source")
+                            .font(.labelMedium)
+                    }
+                    .foregroundColor(.sage)
                 }
-                .foregroundColor(.sage)
-                .padding(.top, Spacing.xs)
+                
+                Button(action: openSupport) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "envelope.fill")
+                            .font(.system(size: 12))
+                        Text("Support")
+                            .font(.labelMedium)
+                    }
+                    .foregroundColor(.sage)
+                }
             }
+            .padding(.top, Spacing.xs)
         }
         .padding(Spacing.lg)
         .background(Color.cardBackground)
@@ -102,6 +114,12 @@ struct ProfileView: View {
     
     private func openGitHub() {
         if let url = URL(string: "https://github.com/Jerfan1/tidied") {
+            UIApplication.shared.open(url)
+        }
+    }
+    
+    private func openSupport() {
+        if let url = URL(string: "mailto:support@jerfan.co.uk") {
             UIApplication.shared.open(url)
         }
     }
