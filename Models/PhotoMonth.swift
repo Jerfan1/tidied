@@ -14,7 +14,7 @@ struct PhotoMonth: Identifiable, Hashable {
         formatter.dateFormat = "MMM"
         let monthName = formatter.monthSymbols[month - 1]
         let shortYear = String(year).suffix(2)
-        return "\(monthName.uppercased()) '\(shortYear)"
+        return "\(monthName.capitalized) '\(shortYear)"
     }
     
     var fullDisplayName: String {

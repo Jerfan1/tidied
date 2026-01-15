@@ -7,7 +7,6 @@ struct MonthSelectorView: View {
     @State private var showingProfile = false
     @State private var showingPaywall = false
     @State private var animateIn = false
-    @State private var lastCompletedMonthName: String = ""
     
     @StateObject private var store = StoreKitManager.shared
     private let monthService = PhotoMonthService.shared
@@ -74,11 +73,16 @@ struct MonthSelectorView: View {
             NavigationStack { ProfileView() }
         }
         .sheet(isPresented: $showingPaywall) {
-            PaywallView(completedMonthName: lastCompletedMonthName)
+            PaywallView()
         }
     }
     
     // MARK: - Paywall Logic
+    
+    /// Key for tracking if user has used their free month (by actually swiping, not skipping)
+    private var hasUsedFreeMonth: Bool {
+        UserDefaults.standard.bool(forKey: "tidied_has_used_free_month")
+    }
     
     /// Check if a month should be locked (requires payment)
     private func isMonthLocked(_ month: PhotoMonth) -> Bool {
@@ -88,20 +92,16 @@ struct MonthSelectorView: View {
         // Already completed months: not locked (they can revisit)
         if month.isCompleted { return false }
         
-        // If they haven't completed any month yet: first one is free
-        if completedCount == 0 { return false }
+        // If they haven't used their free month yet: this one is free
+        if !hasUsedFreeMonth { return false }
         
-        // They've completed 1+ months and aren't Pro: lock new months
+        // They've used their free month and aren't Pro: lock new months
         return true
     }
     
     /// Handle tapping on a month
     private func handleMonthTap(_ month: PhotoMonth) {
         if isMonthLocked(month) {
-            // Find their last completed month for the paywall message
-            if let lastCompleted = months.first(where: { $0.isCompleted }) {
-                lastCompletedMonthName = lastCompleted.displayName
-            }
             showingPaywall = true
         } else {
             selectedMonth = month

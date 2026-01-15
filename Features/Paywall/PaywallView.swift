@@ -5,8 +5,10 @@ struct PaywallView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var store = StoreKitManager.shared
     
-    // Optional: personalized message showing what month they completed
-    var completedMonthName: String? = nil
+    // Read directly from UserDefaults to avoid SwiftUI timing issues
+    private var completedMonthName: String? {
+        UserDefaults.standard.string(forKey: "tidied_last_completed_month")
+    }
     
     @State private var selectedProduct: Product?
     @State private var isPurchasing = false

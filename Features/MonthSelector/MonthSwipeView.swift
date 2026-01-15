@@ -607,6 +607,12 @@ private var rotationAngle: Double {
         updatedMonth.reviewedCount = month.totalCount
         monthService.markMonthCompleted(updatedMonth)
         
+        // Mark that they've used their free month (for paywall logic)
+        UserDefaults.standard.set(true, forKey: "tidied_has_used_free_month")
+        
+        // Save this month's name for the paywall message
+        UserDefaults.standard.set(month.displayName, forKey: "tidied_last_completed_month")
+        
         // Clear pending actions since month is done
         monthService.clearPendingActions(for: month)
         
