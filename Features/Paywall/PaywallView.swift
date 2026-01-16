@@ -87,6 +87,29 @@ struct PaywallView: View {
                         ProgressView()
                             .tint(.rose)
                             .padding()
+                    } else if store.products.isEmpty {
+                        // Error state - products failed to load
+                        VStack(spacing: Spacing.md) {
+                            Image(systemName: "wifi.exclamationmark")
+                                .font(.system(size: 32))
+                                .foregroundColor(.textTertiary)
+                            
+                            Text("Couldn't load options")
+                                .font(.bodyMedium)
+                                .foregroundColor(.textSecondary)
+                            
+                            Button(action: {
+                                Task {
+                                    await store.loadProducts()
+                                    selectDefaultProduct()
+                                }
+                            }) {
+                                Text("Try Again")
+                                    .font(.labelMedium)
+                                    .foregroundColor(.rose)
+                            }
+                        }
+                        .padding(.vertical, Spacing.xl)
                     } else {
                         VStack(spacing: Spacing.sm) {
                             ForEach(store.products, id: \.id) { product in
@@ -232,7 +255,10 @@ struct ProductCard: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Text(product.emoji)
+                        Image(systemName: product.iconName)
+                            .font(.system(size: 16))
+                            .foregroundColor(.rose)
+                            .frame(width: 24)
                         Text(product.displayName)
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.textPrimary)

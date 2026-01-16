@@ -52,11 +52,19 @@ class StoreKitManager: ObservableObject {
     /// Load products from App Store
     func loadProducts() async {
         isLoading = true
+        print("🛒 Requesting products: \(productIDs)")
         do {
             products = try await Product.products(for: productIDs)
             products.sort { $0.price < $1.price }
+            print("🛒 Loaded \(products.count) products:")
+            for product in products {
+                print("   - \(product.id): \(product.displayName) @ \(product.displayPrice)")
+            }
+            if products.isEmpty {
+                print("⚠️ No products returned! Check App Store Connect setup.")
+            }
         } catch {
-            print("Failed to load products: \(error)")
+            print("❌ Failed to load products: \(error)")
         }
         isLoading = false
     }
@@ -154,12 +162,12 @@ class StoreKitManager: ObservableObject {
 // MARK: - Product Helpers
 
 extension Product {
-    var emoji: String {
+    var iconName: String {
         switch self.id {
-        case "tidied.monthly": return "📅"
-        case "tidied.yearly": return "📆"
-        case "tidied.lifetime": return "♾️"
-        default: return "✨"
+        case "tidied.monthly": return "calendar"
+        case "tidied.yearly": return "star.circle"
+        case "tidied.lifetime": return "infinity"
+        default: return "sparkles"
         }
     }
     
