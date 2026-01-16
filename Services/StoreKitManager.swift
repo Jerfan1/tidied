@@ -174,9 +174,9 @@ extension Product {
     
     var subtitle: String {
         switch self.id {
-        case "tidied.monthly": return "Billed monthly"
-        case "tidied.yearly": return "Save 58%"
-        case "tidied.lifetime": return "Pay once, own forever"
+        case "tidied.monthly": return "1 month, auto-renews"
+        case "tidied.yearly": return "1 year, auto-renews"
+        case "tidied.lifetime": return "One-time purchase"
         default: return ""
         }
     }

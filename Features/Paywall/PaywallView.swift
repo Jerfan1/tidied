@@ -132,6 +132,16 @@ struct PaywallView: View {
                         Text("Cancel anytime • Secure payment via Apple")
                             .font(.labelSmall)
                             .foregroundColor(.textTertiary)
+                        
+                        // Required links for App Store compliance
+                        HStack(spacing: Spacing.md) {
+                            Link("Privacy Policy", destination: URL(string: "https://github.com/Jerfan1/tidied/blob/main/PRIVACY.md")!)
+                            Text("•")
+                                .foregroundColor(.textTertiary)
+                            Link("Terms of Use", destination: URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!)
+                        }
+                        .font(.labelSmall)
+                        .foregroundColor(.textTertiary)
                     }
                     .padding(.bottom, Spacing.xxl)
                 }
@@ -143,11 +153,12 @@ struct PaywallView: View {
             Text(errorMessage)
         }
         .onAppear {
-            // Pre-select lifetime as best value
-            if let lifetime = store.products.first(where: { $0.id == "tidied.lifetime" }) {
-                selectedProduct = lifetime
-            } else {
-                selectedProduct = store.products.first
+            selectDefaultProduct()
+        }
+        .onChange(of: store.products) { _, _ in
+            // Products loaded - select default if nothing selected yet
+            if selectedProduct == nil {
+                selectDefaultProduct()
             }
         }
     }
@@ -176,6 +187,15 @@ struct PaywallView: View {
             if store.isPro {
                 dismiss()
             }
+        }
+    }
+    
+    private func selectDefaultProduct() {
+        // Pre-select lifetime as best value
+        if let lifetime = store.products.first(where: { $0.id == "tidied.lifetime" }) {
+            selectedProduct = lifetime
+        } else if let first = store.products.first {
+            selectedProduct = first
         }
     }
 }

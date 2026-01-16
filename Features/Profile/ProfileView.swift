@@ -135,14 +135,14 @@ struct ProfileView: View {
             
             // Links
             HStack(spacing: Spacing.lg) {
-                Button(action: openGitHub) {
+            Button(action: openGitHub) {
                     HStack(spacing: 4) {
                         Image(systemName: "chevron.left.forwardslash.chevron.right")
                             .font(.system(size: 12))
                         Text("Source")
-                            .font(.labelMedium)
-                    }
-                    .foregroundColor(.sage)
+                        .font(.labelMedium)
+                }
+                .foregroundColor(.sage)
                 }
                 
                 Button(action: openSupport) {
@@ -155,7 +155,7 @@ struct ProfileView: View {
                     .foregroundColor(.sage)
                 }
             }
-            .padding(.top, Spacing.xs)
+                .padding(.top, Spacing.xs)
         }
         .padding(Spacing.lg)
         .background(Color.cardBackground)
