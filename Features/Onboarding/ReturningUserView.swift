@@ -5,6 +5,7 @@ struct ReturningUserView: View {
     let onStartFrom: (Int, Int) -> Void  // year, month
     
     @State private var animateIn = false
+    @State private var showDatePicker = false  // Yes/No gate
     @State private var selectedYear: Int?
     @State private var selectedMonth: Int?
     @State private var showMonthPicker = false
@@ -25,53 +26,12 @@ struct ReturningUserView: View {
         ZStack {
             Color.appBackground.ignoresSafeArea()
             
-            VStack(spacing: Spacing.xl) {
-                Spacer()
-                
-                // Icon
-                ZStack {
-                    Circle()
-                        .fill(Color.roseLight)
-                        .frame(width: 90, height: 90)
-                    
-                    Image(systemName: "arrow.counterclockwise")
-                        .font(.system(size: 32, weight: .light))
-                        .foregroundColor(.rose)
-                }
-                .scaleEffect(animateIn ? 1 : 0.8)
-                .opacity(animateIn ? 1 : 0)
-                
-                // Title
-                VStack(spacing: Spacing.sm) {
-                    Text("Pick up where you left off")
-                        .font(.titleMedium)
-                        .foregroundColor(.textPrimary)
-                        .multilineTextAlignment(.center)
-                    
-                    Text("Used a similar app before? We'll skip what you've already done.")
-                        .font(.bodyMedium)
-                        .foregroundColor(.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .padding(.horizontal, Spacing.lg)
-                }
-                .opacity(animateIn ? 1 : 0)
-                .offset(y: animateIn ? 0 : 15)
-                
-                if !showMonthPicker {
-                    // Year selector
-                    yearSelector
-                } else {
-                    // Month selector (after year is picked)
-                    monthSelector
-                }
-                
-                Spacer()
-                
-                // Actions
-                actionButtons
-                
-                Spacer().frame(height: Spacing.lg)
+            if !showDatePicker {
+                // Step 1: Yes/No question
+                yesNoQuestion
+            } else {
+                // Step 2: Date picker (only if they said Yes)
+                datePickerView
             }
         }
         .onAppear {
@@ -81,9 +41,126 @@ struct ReturningUserView: View {
         }
     }
     
+    // MARK: - Yes/No Question (First screen)
+    
+    private var yesNoQuestion: some View {
+        VStack(spacing: Spacing.xl) {
+            Spacer()
+            
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.roseLight)
+                    .frame(width: 90, height: 90)
+                
+                Image(systemName: "sparkles")
+                    .font(.system(size: 32, weight: .light))
+                    .foregroundColor(.rose)
+            }
+            .scaleEffect(animateIn ? 1 : 0.8)
+            .opacity(animateIn ? 1 : 0)
+            
+            // Question
+            VStack(spacing: Spacing.sm) {
+                Text("One quick question")
+                    .font(.titleMedium)
+                    .foregroundColor(.textPrimary)
+                
+                Text("Have you cleaned your camera roll with another app before?")
+                    .font(.bodyMedium)
+                    .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, Spacing.lg)
+            }
+            .opacity(animateIn ? 1 : 0)
+            
+            Spacer()
+            
+            // Yes/No buttons
+            VStack(spacing: Spacing.md) {
+                Button(action: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showDatePicker = true
+                    }
+                }) {
+                    Text("Yes, skip what I've done")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.rose)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.roseLight)
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
+                }
+                .padding(.horizontal, Spacing.lg)
+                
+                Button(action: onStartFresh) {
+                    Text("No, start fresh")
+                        .font(.system(size: 17, weight: .semibold))
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                        .background(Color.rose)
+                        .clipShape(RoundedRectangle(cornerRadius: CornerRadius.medium))
+                }
+                .padding(.horizontal, Spacing.lg)
+            }
+            .opacity(animateIn ? 1 : 0)
+            
+            Spacer().frame(height: Spacing.xxl)
+        }
+    }
+    
+    // MARK: - Date Picker (Second screen, only if Yes)
+    
+    private var datePickerView: some View {
+        VStack(spacing: Spacing.xl) {
+            Spacer()
+            
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(Color.roseLight)
+                    .frame(width: 90, height: 90)
+                
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 32, weight: .light))
+                    .foregroundColor(.rose)
+            }
+            
+            // Title
+            VStack(spacing: Spacing.sm) {
+                Text("Where did you get up to?")
+                    .font(.titleMedium)
+                    .foregroundColor(.textPrimary)
+                    .multilineTextAlignment(.center)
+                
+                Text("We'll skip everything before this date.")
+                    .font(.bodyMedium)
+                    .foregroundColor(.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, Spacing.lg)
+            }
+            
+            if !showMonthPicker {
+                // Year selector
+                yearSelector
+            } else {
+                // Month selector (after year is picked)
+                monthSelector
+            }
+            
+            Spacer()
+            
+            // Actions
+            actionButtons
+            
+            Spacer().frame(height: Spacing.lg)
+        }
+    }
+    
     private var yearSelector: some View {
         VStack(spacing: Spacing.md) {
-            Text("I got up to:")
+            Text("Select year:")
                 .font(.labelMedium)
                 .foregroundColor(.textTertiary)
             
@@ -106,33 +183,11 @@ struct ReturningUserView: View {
                 .padding(.horizontal, Spacing.lg)
             }
         }
-        .opacity(animateIn ? 1 : 0)
-        .offset(y: animateIn ? 0 : 20)
     }
     
     private var monthSelector: some View {
         VStack(spacing: Spacing.md) {
             if let year = selectedYear {
-                HStack {
-                    Button(action: {
-                        withAnimation {
-                            showMonthPicker = false
-                            selectedMonth = nil
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                                .font(.system(size: 12, weight: .semibold))
-                            Text("Back")
-                                .font(.labelMedium)
-                        }
-                        .foregroundColor(.rose)
-                    }
-                    
-                    Spacer()
-                }
-                .padding(.horizontal, Spacing.lg)
-                
                 Text("Which month in \(String(year))?")
                     .font(.labelMedium)
                     .foregroundColor(.textTertiary)
@@ -201,15 +256,24 @@ struct ReturningUserView: View {
                 }
             }
             
-            Button(action: onStartFresh) {
-                Text("Start from the beginning")
+            // Back button
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    if showMonthPicker {
+                        showMonthPicker = false
+                        selectedMonth = nil
+                    } else {
+                        showDatePicker = false
+                        selectedYear = nil
+                    }
+                }
+            }) {
+                Text("Back")
                     .font(.labelLarge)
                     .foregroundColor(.textSecondary)
                     .padding(.vertical, 12)
             }
         }
-        .opacity(animateIn ? 1 : 0)
-        .offset(y: animateIn ? 0 : 25)
     }
 }
 

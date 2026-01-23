@@ -310,28 +310,28 @@ struct MonthSwipeView: View {
             
             // DELETE pill button
             Button(action: deleteCurrent) {
-                HStack(spacing: 5) {
+                HStack(spacing: 6) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                     Text("Delete")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                 }
                 .foregroundColor(.rose)
                 .fixedSize()
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .background(
                     Capsule()
                         .fill(Color.roseLight)
                 )
             }
             
-            // FAVOURITE button (icon only, smaller)
+            // FAVOURITE button (icon only)
             Button(action: favouriteCurrent) {
                 Image(systemName: "heart.fill")
-                    .font(.system(size: 14))
+                    .font(.system(size: 16))
                     .foregroundColor(.favouriteGold)
-                    .frame(width: 40, height: 40)
+                    .frame(width: 44, height: 44)
                     .background(
                         Circle()
                             .fill(Color.favouriteGold.opacity(0.15))
@@ -340,16 +340,16 @@ struct MonthSwipeView: View {
             
             // KEEP pill button
             Button(action: keepCurrent) {
-                HStack(spacing: 5) {
+                HStack(spacing: 6) {
                     Image(systemName: "checkmark")
-                        .font(.system(size: 12, weight: .bold))
+                        .font(.system(size: 14, weight: .bold))
                     Text("Keep")
-                        .font(.system(size: 13, weight: .semibold))
+                        .font(.system(size: 15, weight: .semibold))
                 }
                 .foregroundColor(.keepGreen)
                 .fixedSize()
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .background(
                     Capsule()
                         .fill(Color.keepGreen.opacity(0.15))
@@ -421,7 +421,7 @@ private var rotationAngle: Double {
         monthService.savePendingActions(actions, for: month)
         
         HapticManager.shared.impact(.light)
-        animateToNextCard()
+        animateToNextCard(direction: .right)
     }
     
     private func deleteCurrent() {
@@ -437,7 +437,7 @@ private var rotationAngle: Double {
         monthService.savePendingActions(actions, for: month)
         
         HapticManager.shared.impact(.medium)
-        animateToNextCard()
+        animateToNextCard(direction: .left)
     }
     
     private func favouriteCurrent() {
@@ -497,20 +497,42 @@ private var rotationAngle: Double {
         HapticManager.shared.impact(.light)
     }
     
-    private func animateToNextCard(direction: SwipeDirection = .horizontal) {
-        let offset: CGSize
+    private func animateToNextCard(direction: SwipeDirection) {
+        // First, briefly show the label by setting dragOffset to trigger opacity
+        let labelOffset: CGSize
+        let flyOutOffset: CGSize
+        
         switch direction {
-        case .horizontal:
-            offset = CGSize(width: dragOffset.width > 0 ? 500 : -500, height: 0)
+        case .right:
+            labelOffset = CGSize(width: 100, height: 0)
+            flyOutOffset = CGSize(width: 500, height: 0)
+        case .left:
+            labelOffset = CGSize(width: -100, height: 0)
+            flyOutOffset = CGSize(width: -500, height: 0)
         case .up:
-            offset = CGSize(width: 0, height: -500)
+            labelOffset = CGSize(width: 0, height: -100)
+            flyOutOffset = CGSize(width: 0, height: -500)
         }
         
-        withAnimation(.easeOut(duration: 0.25)) {
-            dragOffset = offset
+        // If dragOffset is near zero (button press), show label first
+        if abs(dragOffset.width) < 50 && abs(dragOffset.height) < 50 {
+            withAnimation(.easeOut(duration: 0.1)) {
+                dragOffset = labelOffset
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    dragOffset = flyOutOffset
+                }
+            }
+        } else {
+            // Already swiping, just fly out
+            withAnimation(.easeOut(duration: 0.25)) {
+                dragOffset = flyOutOffset
+            }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             dragOffset = .zero
             currentIndex += 1
             
@@ -607,9 +629,6 @@ private var rotationAngle: Double {
         updatedMonth.reviewedCount = month.totalCount
         monthService.markMonthCompleted(updatedMonth)
         
-        // Mark that they've used their free month (for paywall logic)
-        UserDefaults.standard.set(true, forKey: "tidied_has_used_free_month")
-        
         // Save this month's name for the paywall message
         UserDefaults.standard.set(month.displayName, forKey: "tidied_last_completed_month")
         
@@ -636,7 +655,8 @@ private var rotationAngle: Double {
     }
     
     enum SwipeDirection {
-        case horizontal
+        case left
+        case right
         case up
     }
 }

@@ -147,10 +147,13 @@ class StoreKitManager: ObservableObject {
     }
     
     private func loadPurchaseState() {
-        // This is just a cache - actual state comes from StoreKit
+        // Use cached value for immediate UI state (prevents lock flicker on launch)
+        // The async StoreKit check will validate/update this shortly after
         let cached = UserDefaults.standard.bool(forKey: purchasedKey)
         if cached {
-            // Will be validated against StoreKit on next check
+            // Set a placeholder so isPro returns true immediately
+            // This will be replaced with real product IDs by updatePurchasedProducts()
+            purchasedProductIDs = ["cached_pro_status"]
         }
     }
     

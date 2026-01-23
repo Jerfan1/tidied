@@ -53,9 +53,24 @@ struct PermissionRequestView: View {
                 if !isDenied {
                     VStack(spacing: Spacing.md) {
                         FeatureRow(icon: "hand.draw", text: "Swipe right to keep, left to delete")
-                        FeatureRow(icon: "trash", text: "Bulk delete in one tap")
-                        FeatureRow(icon: "lock.shield", text: "100% private - nothing leaves your device")
-                        FeatureRow(icon: "chevron.left.forwardslash.chevron.right", text: "Open source - see exactly what we do")
+                        FeatureRow(icon: "checkmark.shield", text: "You approve all deletions")
+                        FeatureRow(icon: "person.slash", text: "No account required")
+                        
+                        // Privacy row - highlighted
+                        HStack(spacing: Spacing.md) {
+                            Image(systemName: "lock.shield.fill")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundColor(.sage)
+                                .frame(width: 36, height: 36)
+                                .background(Color.sage.opacity(0.2))
+                                .clipShape(Circle())
+                            
+                            Text("Only you see your photos")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(.sage)
+                            
+                            Spacer()
+                        }
                     }
                     .padding(.horizontal, Spacing.xl)
                     .opacity(animateIn ? 1 : 0)
@@ -95,9 +110,13 @@ struct PermissionRequestView: View {
                     .disabled(isRequesting)
                     .padding(.horizontal, Spacing.lg)
                     
-                    Text("your photos never leave your device")
-                        .font(.bodySmall)
-                        .foregroundColor(.textTertiary)
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.shield.fill")
+                            .font(.system(size: 12))
+                        Text("Your photos never leave your device")
+                            .font(.system(size: 13, weight: .medium))
+                    }
+                    .foregroundColor(.sage)
                 }
                 .opacity(animateIn ? 1 : 0)
                 .offset(y: animateIn ? 0 : 25)
@@ -121,14 +140,14 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: Spacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(.system(size: 18))
                 .foregroundColor(.sage)
-                .frame(width: 32, height: 32)
+                .frame(width: 36, height: 36)
                 .background(Color.sageLight)
                 .clipShape(Circle())
             
             Text(text)
-                .font(.bodySmall)
+                .font(.system(size: 15))
                 .foregroundColor(.textSecondary)
             
             Spacer()

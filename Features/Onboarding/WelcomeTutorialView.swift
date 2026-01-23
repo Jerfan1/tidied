@@ -12,6 +12,26 @@ struct WelcomeTutorialView: View {
             VStack(spacing: Spacing.xl) {
                 Spacer()
                 
+                // Privacy badge - prominent and reassuring
+                HStack(spacing: 8) {
+                    Image(systemName: "lock.shield.fill")
+                        .font(.system(size: 16))
+                    Text("100% Private")
+                        .font(.system(size: 14, weight: .semibold))
+                    Text("•")
+                        .font(.system(size: 12))
+                    Text("Photos never leave your device")
+                        .font(.system(size: 14))
+                }
+                .foregroundColor(.sage)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule()
+                        .fill(Color.sageLight)
+                )
+                .opacity(animateIn ? 1 : 0)
+                
                 // Title
                 VStack(spacing: Spacing.sm) {
                     Text("How It Works")

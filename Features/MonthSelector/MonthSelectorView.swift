@@ -79,9 +79,18 @@ struct MonthSelectorView: View {
     
     // MARK: - Paywall Logic
     
-    /// Key for tracking if user has used their free month (by actually swiping, not skipping)
-    private var hasUsedFreeMonth: Bool {
-        UserDefaults.standard.bool(forKey: "tidied_has_used_free_month")
+    /// Free allowance thresholds (all checked locally, no network)
+    private let freeMonthsLimit = 3
+    private let freeSwipesLimit = 100
+    
+    /// Check if user has exhausted their free allowance
+    /// Uses existing local stats - no new data collection
+    private var hasExhaustedFreeAllowance: Bool {
+        let completedMonths = stats.monthsCompleted
+        let totalSwipes = stats.totalReviewed
+        
+        // Free until: 3 months completed OR 100 swipes
+        return completedMonths >= freeMonthsLimit || totalSwipes >= freeSwipesLimit
     }
     
     /// Check if a month should be locked (requires payment)
@@ -92,10 +101,10 @@ struct MonthSelectorView: View {
         // Already completed months: not locked (they can revisit)
         if month.isCompleted { return false }
         
-        // If they haven't used their free month yet: this one is free
-        if !hasUsedFreeMonth { return false }
+        // If they haven't exhausted free allowance: this one is free
+        if !hasExhaustedFreeAllowance { return false }
         
-        // They've used their free month and aren't Pro: lock new months
+        // They've used their free allowance and aren't Pro: lock new months
         return true
     }
     
