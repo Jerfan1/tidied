@@ -855,6 +855,9 @@ struct MonthCompletionView: View {
                         showSuccess = true
                     }
                     HapticManager.shared.notification(.success)
+                    
+                    // Request App Store review at win moment (after confetti)
+                    ReviewManager.shared.requestReviewIfAppropriate(deletedCount: deleteCount)
                 }
             } catch {
                 await MainActor.run {
