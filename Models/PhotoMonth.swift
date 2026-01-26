@@ -89,12 +89,12 @@ class PhotoMonthService {
             }
         }
         
-        // Sort by date (oldest first)
+        // Sort by date (newest first)
         return months.sorted { 
             if $0.year != $1.year {
-                return $0.year < $1.year
+                return $0.year > $1.year
             }
-            return $0.month < $1.month
+            return $0.month > $1.month
         }
     }
     
