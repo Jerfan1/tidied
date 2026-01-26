@@ -12,7 +12,7 @@ class ReviewManager {
     // Thresholds
     private let minDaysBetweenRequests = 90
     private let minDaysSinceInstall = 3
-    private let minDeletedPhotos = 20
+    private let minDeletedPhotos = 10
     
     private init() {
         // Record install date on first launch
