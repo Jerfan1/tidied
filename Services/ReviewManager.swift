@@ -6,34 +6,26 @@ import UIKit
 class ReviewManager {
     static let shared = ReviewManager()
     
-    private let lastRequestKey = "review_lastRequestDate"
-    private let installDateKey = "review_installDate"
+    private let hasRequestedFirstMonthReviewKey = "review_hasRequestedFirstMonth"
     
-    // Thresholds
-    private let minDaysBetweenRequests = 90
-    private let minDaysSinceInstall = 3
-    private let minDeletedPhotos = 10
+    private init() {}
     
-    private init() {
-        // Record install date on first launch
-        if UserDefaults.standard.object(forKey: installDateKey) == nil {
-            UserDefaults.standard.set(Date(), forKey: installDateKey)
+    /// Call this after first month completion - the ideal "win moment"
+    /// Triggers before paywall (which is at 3 months) to maximize positive reviews
+    func requestReviewOnFirstMonthCompletion(monthsCompleted: Int) {
+        // Only trigger on first month completion
+        guard monthsCompleted == 1 else { return }
+        
+        // Only request once for this trigger
+        guard !UserDefaults.standard.bool(forKey: hasRequestedFirstMonthReviewKey) else { return }
+        
+        // Mark as requested (even if Apple doesn't show it)
+        UserDefaults.standard.set(true, forKey: hasRequestedFirstMonthReviewKey)
+        
+        // Small delay to let the celebration moment land
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            self.requestReview()
         }
-    }
-    
-    /// Call this after a successful deletion (win moment)
-    func requestReviewIfAppropriate(deletedCount: Int) {
-        // Check minimum deleted photos
-        guard deletedCount >= minDeletedPhotos else { return }
-        
-        // Check days since install
-        guard daysSinceInstall() >= minDaysSinceInstall else { return }
-        
-        // Check days since last request
-        guard daysSinceLastRequest() >= minDaysBetweenRequests else { return }
-        
-        // All conditions met - request review
-        requestReview()
     }
     
     private func requestReview() {
@@ -42,24 +34,8 @@ class ReviewManager {
             .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
             
             // Request review through Apple's API
+            // Apple throttles this automatically (max 3 per year per user)
             SKStoreReviewController.requestReview(in: windowScene)
-            
-            // Record the request date
-            UserDefaults.standard.set(Date(), forKey: lastRequestKey)
         }
-    }
-    
-    private func daysSinceInstall() -> Int {
-        guard let installDate = UserDefaults.standard.object(forKey: installDateKey) as? Date else {
-            return 0
-        }
-        return Calendar.current.dateComponents([.day], from: installDate, to: Date()).day ?? 0
-    }
-    
-    private func daysSinceLastRequest() -> Int {
-        guard let lastRequest = UserDefaults.standard.object(forKey: lastRequestKey) as? Date else {
-            return Int.max // Never requested before
-        }
-        return Calendar.current.dateComponents([.day], from: lastRequest, to: Date()).day ?? 0
     }
 }

@@ -856,8 +856,11 @@ struct MonthCompletionView: View {
                     }
                     HapticManager.shared.notification(.success)
                     
-                    // Request App Store review at win moment (after confetti)
-                    ReviewManager.shared.requestReviewIfAppropriate(deletedCount: deleteCount)
+                    // Request App Store review on first month completion
+                    // Triggers before paywall (3 months) to maximize positive reviews
+                    ReviewManager.shared.requestReviewOnFirstMonthCompletion(
+                        monthsCompleted: StatsService.shared.monthsCompleted
+                    )
                 }
             } catch {
                 await MainActor.run {
